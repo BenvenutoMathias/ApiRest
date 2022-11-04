@@ -2,12 +2,14 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using RestApi.Repositories;
+using RestApi.DataAccess;
+using RestApi.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,11 +27,66 @@ namespace RestApi
         public IConfiguration Configuration { get; }
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<IItemsRepository, InMemItemsRepository>();
+            var connectionString = Configuration.GetConnectionString("UniversityDB");
+
+            //3. Add context
+            services.AddDbContext<UniversityDBContext>(options => options.UseSqlServer(connectionString));
+
+            //7. Add Service of Jwt Autorization
+            //To do
+            services.AddJwtTokenServices(Configuration);
+
             services.AddControllers();
-            services.AddSwaggerGen(c =>
+
+            //4. Add Custom Services (folder services)
+            services.AddScoped<IStudentsService, StudentsService>();
+
+            //8. Add Authorization (claims) [UserOnly]
+            services.AddAuthorization(options =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "RestApi", Version = "v1" });
+                options.AddPolicy("UserOnlyPolicy", policy => policy.RequireClaim("UserOnly", "User1"));
+            });
+
+            //To Do: Add the rest of services
+            services.AddSwaggerGen(o =>
+            {
+                o.SwaggerDoc("v1", new OpenApiInfo { Title = "RestApi", Version = "v1" });
+
+                o.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "Bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Description = "JWT Authorization Header using Bearer Scheme"
+                });
+
+                o.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        new string[]{}
+                    }
+                });
+            });
+
+            //5. CORS Configuration
+            services.AddCors(options =>
+            {
+                options.AddPolicy(name: "CorsPolicy", builder =>
+                {
+                    builder.AllowAnyOrigin();
+                    builder.AllowAnyMethod();
+                    builder.AllowAnyHeader();
+                });
             });
         }
 
@@ -52,6 +109,8 @@ namespace RestApi
             {
                 endpoints.MapControllers();
             });
+
+            app.UseCors("CorsPolicy");
         }
     }
 }

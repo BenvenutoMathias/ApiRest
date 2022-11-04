@@ -1,5 +1,11 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
+using RestApi.DataAccess;
+using Microsoft.Extensions.DependencyInjection;
+
 
 namespace RestApi
 {
@@ -18,3 +24,9 @@ namespace RestApi
                 });
     }
 }
+
+
+
+
+
+
