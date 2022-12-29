@@ -6,7 +6,6 @@ using Microsoft.Extensions.Configuration;
 using RestApi.DataAccess;
 using Microsoft.Extensions.DependencyInjection;
 
-
 namespace RestApi
 {
     public class Program
@@ -24,9 +23,3 @@ namespace RestApi
                 });
     }
 }
-
-
-
-
-
-

@@ -1,8 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.VisualBasic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RestApi.Entities.DataEntities
 {
-    public enum Role
+    public enum Roles
     {
         User,
         Administrator
@@ -18,7 +20,7 @@ namespace RestApi.Entities.DataEntities
         public string EmailAdress { get; set; } = string.Empty;
         [Required]
         public string Password { get; set; } = string.Empty;
-        public Role Role { get; set; } = Role.User;
 
+        public int Role { get; set; } = Roles.User.GetHashCode();
     }
 }

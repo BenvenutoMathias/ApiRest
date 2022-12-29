@@ -12,6 +12,6 @@ namespace RestApi.Entities.DataEntities
         public string EmailId { get; set; }
         public Guid GuidId { get; set; }
         public DateTime ExpiredTime { get; set; }
-        public Role Role { get; set; } = Role.User;
+        public int Role { get; set; } = Roles.User.GetHashCode();
     }
 }
